@@ -1,7 +1,6 @@
-#include <iostream>
 #include <fstream>
 #include <set>
-#include <ctype.h>
+#include <cctype>
 
 int main() {
     std::set<char> charSet;
@@ -19,7 +18,7 @@ int main() {
     for (auto letter = charSet.begin(); letter != charSet.end(); letter++) {
         outfile << *letter;
     }
-    outfile << '\n';
+    outfile << std::endl;
     
     infile.close();
     outfile.close();
