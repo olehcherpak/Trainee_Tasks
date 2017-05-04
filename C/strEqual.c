@@ -8,9 +8,6 @@ int strEqual(char str1[], char str2[]) {
             return 0;
         }
     }
-    if (*str1 != *str2) {
-        return 0;
-    }
     
     return 1;
 }
