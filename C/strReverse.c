@@ -2,15 +2,18 @@
 
 #define MAX_LENGTH 101
 
-void strReverse(char str[]) {
+int strLen(char str[]) {
+    char* runPtr = str;
+    for (; *runPtr != '\0'; runPtr++) {}
+    return runPtr - str;
+}
+
+void strReverse(char str[], int size) {
     char *forwardPtr = str;
-    char *reversePtr = str;
+    char *reversePtr = str + size;
     
-    for (; *reversePtr != '\0'; reversePtr++) {
-        ;
-    }
     reversePtr -= 1;
-    for (char tmp; reversePtr - forwardPtr >= 1; forwardPtr++, reversePtr--) {
+    for (char tmp; reversePtr > forwardPtr; forwardPtr++, reversePtr--) {
         tmp = *reversePtr;
         *reversePtr = *forwardPtr;
         *forwardPtr = tmp;
@@ -24,7 +27,7 @@ int main() {
     
     fscanf(infile, "%100s", str);
     fclose(infile);
-    strReverse(str);
+    strReverse(str, strLen(str));
     fprintf(outfile, "%s\n", str);
     fclose(outfile);
     
