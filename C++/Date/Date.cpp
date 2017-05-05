@@ -1,21 +1,22 @@
-#include "Date.hpp"
 #include <set>
 #include <iostream>
+
+#include "Date.hpp"
 
 #define MAXMONTH 12
 
 Date::Date(const int& _day, const int& _mounth, const int& _year) {
-	if (_year < 0) {
+	if (_year == 0) {
 		throw unvalid_date_exception();
 	} 
 	year = _year;
 
-	if (_mounth <= 0 && _mounth > MAXMONTH) {
+	if (_mounth <= 0 || _mounth > MAXMONTH) {
 		throw unvalid_date_exception();
 	}
 	mounth = _mounth;
 
-	if (_day <= 0 && _day > mounthLength(mounth, year)) {
+	if (_day <= 0 || _day > mounthLength(mounth, year)) {
 		throw unvalid_date_exception();
 	}
 	day = _day;
@@ -42,19 +43,19 @@ int Date::mounthLength(const int& m, const int& y) const {
 }
 
 bool Date::leapYear(const int& y) const {
-	if (y % 4 == 0) {
-        if (y % 100 == 0) {
-            if (y % 400 == 0) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    } else {
-        return false;
+    if (y % 400 == 0) {
+    	return true;
     }
+
+    if (y % 100 == 0) {
+    	return false;
+    }
+
+    if (y % 4 == 0) {
+    	return true;
+    }
+    
+    return false;
 }
 
 int Date::getDay() const {
