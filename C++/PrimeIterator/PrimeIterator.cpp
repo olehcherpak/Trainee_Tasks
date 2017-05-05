@@ -3,11 +3,11 @@
 #include "PrimeIterator.hpp"
 
 PrimeIterator::PrimeIterator(const int& first, const int& limit):start(first), finish(first + limit) {
-	if (first == 0) {
-		throw unvalid_data_exception();
-	}
-	for (numberValue = 3, index = 1; index != start; numberValue++) {
-		for (int j=2; j <= numberValue; j++) {
+    if (first == 0) {
+        throw unvalid_data_exception();
+    }
+    for (numberValue = 3, index = 1; index != start; numberValue++) {
+        for (int j=2; j <= numberValue; j++) {
             if (numberValue % j == 0) {
                 break;
             } else if (j+1 > sqrt(numberValue)) {
@@ -15,8 +15,8 @@ PrimeIterator::PrimeIterator(const int& first, const int& limit):start(first), f
                 break;
             }
         }
-	}
-	numberValue -= 1;
+    }
+    numberValue -= 1;
 }
 
 PrimeIterator::~PrimeIterator() {
@@ -24,11 +24,11 @@ PrimeIterator::~PrimeIterator() {
 }
 
 int PrimeIterator::getIndex() const {
-	return index;
+    return index;
 }
 
 void PrimeIterator::next() {
-	for (int i = numberValue + 1; i < INT_MAX; i++) {
+    for (int i = numberValue + 1; i < INT_MAX; i++) {
         for (int j=2; j <= i; j++) {
             if (i % j == 0) {
                 break;
@@ -42,7 +42,7 @@ void PrimeIterator::next() {
 }
 
 void PrimeIterator::prev() {
-	for (int i = numberValue-1; i > 0; i--) {
+    for (int i = numberValue-1; i > 0; i--) {
         for (int j = 2; j <= i; j++) {
             if (i % j == 0) {
                 break;
@@ -56,39 +56,39 @@ void PrimeIterator::prev() {
 }
 
 int PrimeIterator::value() {
-	return numberValue;
+    return numberValue;
 }
 
 bool PrimeIterator::over() const {
-	return index == finish;
+    return index == finish;
 }
 
 bool PrimeIterator::first() const {
-	return index == start;
+    return index == start;
 }
 
 int PrimeIterator::operator++() {
-	int res = numberValue;
-	next();
-	return res;
+    int res = numberValue;
+    next();
+    return res;
 }
 
 int PrimeIterator::operator++(int) {
-	next();
-	return numberValue;
+    next();
+    return numberValue;
 }
 
 int PrimeIterator::operator--() {
-	int res = numberValue;
-	prev();
-	return res;
+    int res = numberValue;
+    prev();
+    return res;
 }
 
 int PrimeIterator::operator--(int) {
-	prev();
-	return numberValue;
+    prev();
+    return numberValue;
 }
 
 int PrimeIterator::operator*() {
-	return numberValue;
+    return numberValue;
 }
