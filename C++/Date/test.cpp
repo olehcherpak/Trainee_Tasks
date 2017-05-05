@@ -4,7 +4,7 @@
 using namespace std;
 
 int main(int argc, char const *argv[]) {
-	Date today(15, 5, 2016);
+    Date today(15, 5, 2016);
     Date happybirthday(17, 1, 1989);
     Date blackDay(29, 2, 1600);
 
@@ -35,5 +35,5 @@ int main(int argc, char const *argv[]) {
     } catch (...) {
         cout << "wow!" << endl;
     }
-	return 0;
+    return 0;
 }
