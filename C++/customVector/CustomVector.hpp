@@ -1,11 +1,12 @@
-#define DEFAULT_CAPACITY 256
+#ifndef CUSTOMVECTOR_HPP
+#define CUSTOMVECTOR_HPP
 
 class CustomVector
 {
 public:
 	CustomVector(const unsigned n);
 	CustomVector();
-	CustomVector(const unsigned, int);
+	CustomVector(const unsigned, const int&);
 	~CustomVector();
 
 	CustomVector& operator=(const CustomVector&);
@@ -43,6 +44,5 @@ private:
 	void moveHandler(unsigned, unsigned);
 };
 
-class out_of_range
-{
-};
+class out_of_range {};
+#endif
