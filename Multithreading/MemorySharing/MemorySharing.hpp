@@ -18,10 +18,14 @@ public:
     void* getMemory(const int&);
     void freeMemory(void*);
 
+    void* realloc(void*, const int&);
+
 private:
 
-    void* cutPart(std::list<MemoryPart>::iterator&, const int&);
-    void combine(std::list<MemoryPart>::iterator&);
+    std::list<MemoryPart>::iterator cutPart(std::list<MemoryPart>::iterator&, const int&);
+    void combine(std::list<MemoryPart>::iterator&, std::list<MemoryPart>::iterator);
+    std::list<MemoryPart>::iterator findPart(void*);
+    void copy(void*, void*, const int&);
 
     std::list<MemoryPart> partsList;
     char* memory;

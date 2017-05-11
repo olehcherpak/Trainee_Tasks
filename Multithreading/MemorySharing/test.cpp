@@ -8,10 +8,11 @@
 #include "MemorySharing.hpp"
 #include "MemoryPart.hpp"
 
-#define MAX_NUM_TIMES 10
+#define MAX_NUM_TIMES 100
 #define MAX_SLEEP_TIME 10
-#define NUM_THREADS 20
-#define MAX_MEMORY 4096
+#define NUM_THREADS 100
+#define MAX_MEMORY 409600
+#define MAX_SIZE 200
 
 std::mutex g_display_mutex;
 
@@ -23,6 +24,7 @@ void print (const int& thread_id, const int *ptr, const int& size) {
     for (int i = 0; i < size; i++) {
         std::cout << " " << ptr[i];
     }
+
     std:: cout << std::endl;
 
     g_display_mutex.unlock();
@@ -30,7 +32,7 @@ void print (const int& thread_id, const int *ptr, const int& size) {
 
 void workingFunction(MemorySharing* alloc, const int thread_id) {
 
-    int size = rand() % 20 + 1;
+    int size = rand() % MAX_SIZE + 1;
     int* ptr = (int*) alloc->getMemory(size * sizeof(int));
 
     for (int i = 0; i < size; i++) {
@@ -40,9 +42,19 @@ void workingFunction(MemorySharing* alloc, const int thread_id) {
     int times = rand() % MAX_NUM_TIMES + 1;
     for (int i = 0; i < times; i++) {
         print(thread_id, ptr, size);
+
+        int newSize = rand() % MAX_SIZE + 1;
+        ptr = (int*) alloc->realloc(ptr, newSize * sizeof(int));
+
+        for (int i = size; i < newSize; i++) {
+            ptr[i] = thread_id;
+        }
+        size = newSize;
+
         std::this_thread::sleep_for(std::chrono::milliseconds(rand() % MAX_SLEEP_TIME + 1));
         print(thread_id, ptr, size);
     }
+    alloc->freeMemory((void*)ptr);
 
 }
 

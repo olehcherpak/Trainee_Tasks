@@ -12,15 +12,19 @@ MemoryPart::~MemoryPart() {
 
 bool MemoryPart::free() const {
     return status;
+
 }
 
 void MemoryPart::makeBusy() {
     mutex = new std::mutex;
-    status = false;
     mutex->lock();
+    status = false;
 }
 
 void MemoryPart::makeFree() {
+    if (status) {
+        return;
+    }
     status = true;
     mutex->unlock();
     delete mutex;
