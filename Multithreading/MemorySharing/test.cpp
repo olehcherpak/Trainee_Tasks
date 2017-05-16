@@ -17,8 +17,7 @@
 std::mutex g_display_mutex;
 
 void print (const int& thread_id, const int *ptr, const int& size) {
-    g_display_mutex.lock();
-
+    std::lock_guard<std::mutex> lock(g_display_mutex);
     std::cout << "THREAD " << thread_id << " ADDRESS " << std::hex << ptr << " SIZE " << std::dec << size << "\n";
     std::cout << "DATA";
     for (int i = 0; i < size; i++) {
@@ -26,14 +25,12 @@ void print (const int& thread_id, const int *ptr, const int& size) {
     }
 
     std:: cout << std::endl;
-
-    g_display_mutex.unlock();
 }
 
-void workingFunction(MemorySharing* alloc, const int thread_id) {
+void libUser(MemorySharing* alloc, const int thread_id) {
 
     int size = rand() % MAX_SIZE + 1;
-    int* ptr = (int*) alloc->getMemory(size * sizeof(int));
+    int* ptr = static_cast<int*>(alloc->getMemory(size * sizeof(int)));
 
     for (int i = 0; i < size; i++) {
         ptr[i] = thread_id;
@@ -44,7 +41,7 @@ void workingFunction(MemorySharing* alloc, const int thread_id) {
         print(thread_id, ptr, size);
 
         int newSize = rand() % MAX_SIZE + 1;
-        ptr = (int*) alloc->realloc(ptr, newSize * sizeof(int));
+        ptr = static_cast<int*>(alloc->realloc(ptr, newSize * sizeof(int)));
 
         for (int i = size; i < newSize; i++) {
             ptr[i] = thread_id;
@@ -54,7 +51,7 @@ void workingFunction(MemorySharing* alloc, const int thread_id) {
         std::this_thread::sleep_for(std::chrono::milliseconds(rand() % MAX_SLEEP_TIME + 1));
         print(thread_id, ptr, size);
     }
-    alloc->freeMemory((void*)ptr);
+    alloc->freeMemory(ptr);
 
 }
 
@@ -66,17 +63,17 @@ int main(int argc, char const *argv[]) {
     MemorySharing* allocator = new MemorySharing();
     allocator->reserveMemory(MAX_MEMORY);
 
-    std::thread t[NUM_THREADS];
+    std::thread threads[NUM_THREADS];
 
     for (int i = 0; i < NUM_THREADS; i++) {
-        t[i] = std::thread(workingFunction, allocator, i);
+        threads[i] = std::thread(libUser, allocator, i);
     }
 
     for (int i = 0; i < NUM_THREADS; i++) {
-        t[i].join();
+        threads[i].join();
     }
 
-    allocator->releaseMemory();
+    // allocator->releaseMemory();
 
     delete allocator;
 

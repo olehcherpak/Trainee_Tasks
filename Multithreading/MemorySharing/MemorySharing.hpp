@@ -12,29 +12,29 @@ public:
     MemorySharing();
     ~MemorySharing();
 
-    void reserveMemory(const int&);
-    void releaseMemory();
+    void reserveMemory(const unsigned size);
 
-    void* getMemory(const int&);
-    void freeMemory(void*);
+    void* getMemory(const unsigned& size);
+    void freeMemory(void* ptr);
 
-    void* realloc(void*, const int&);
+    void* realloc(void* ptr, const unsigned& size);
 
 private:
 
-    std::list<MemoryPart>::iterator cutPart(std::list<MemoryPart>::iterator&, const int&);
-    void combine(std::list<MemoryPart>::iterator&, std::list<MemoryPart>::iterator);
-    std::list<MemoryPart>::iterator findPart(void*);
-    void copy(void*, void*, const int&);
+    std::list<MemoryPart>::iterator cutPart(std::list<MemoryPart>::iterator& iter, const unsigned& size);
+    void combine(std::list<MemoryPart>::iterator& iter1, std::list<MemoryPart>::iterator iter2);
+    std::list<MemoryPart>::iterator findPart(void* ptr);
+    void copy(void* source, void* target, const unsigned& size);
 
     std::list<MemoryPart> partsList;
     char* memory;
-    std::mutex* mutex;
+    std::mutex mutex;
 
 };
 
 class out_of_memory_exception {};
 class bad_pointer_exception {};
 class wrong_size_exception {};
+class twice_memory_reservation_exception {};
 
 #endif

@@ -1,26 +1,23 @@
 #ifndef MEMORYPART_HPP
 #define MEMORYPART_HPP
 
-#include <mutex>
-
 class MemoryPart
 {
 public:
-    MemoryPart(char*, const int&);
+    MemoryPart(char* start, const unsigned& size);
     ~MemoryPart();
-    bool free() const;
+    bool isFree() const;
     void makeBusy();
     void makeFree();
-    int getLength() const;
-    void setLength(const int&);
+    unsigned getLength() const;
+    void setLength(const unsigned& newLength);
     char* getPtr() const;
-    void setPtr(char*);
+    void setPtr(char* newPtr);
 
 private:
     char* startPtr;
-    int length;
+    unsigned length;
     bool status;
-    std::mutex* mutex;
 };
 
 #endif

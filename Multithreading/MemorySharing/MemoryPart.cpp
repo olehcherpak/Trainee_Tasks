@@ -1,23 +1,17 @@
 #include <mutex>
 
 #include "MemoryPart.hpp"
+#include "MemorySharing.hpp"
 
-MemoryPart::MemoryPart(char* start, const int& size) : startPtr(start), length(size), status(true) {
+MemoryPart::MemoryPart(char* start, const unsigned& size) : startPtr(start), length(size), status(true) {}
 
-}
+MemoryPart::~MemoryPart() {}
 
-MemoryPart::~MemoryPart() {
-
-}
-
-bool MemoryPart::free() const {
+bool MemoryPart::isFree() const {
     return status;
-
 }
 
 void MemoryPart::makeBusy() {
-    mutex = new std::mutex;
-    mutex->lock();
     status = false;
 }
 
@@ -26,15 +20,13 @@ void MemoryPart::makeFree() {
         return;
     }
     status = true;
-    mutex->unlock();
-    delete mutex;
 }
 
-int MemoryPart::getLength() const {
+unsigned MemoryPart::getLength() const {
     return length;
 }
 
-void MemoryPart::setLength(const int& newLength) {
+void MemoryPart::setLength(const unsigned& newLength) {
     length = newLength;
 }
 
@@ -43,5 +35,8 @@ char* MemoryPart::getPtr() const {
 }
 
 void MemoryPart::setPtr(char* newPtr) {
+    if (newPtr == nullptr) {
+        throw bad_pointer_exception();
+    }
     startPtr = newPtr;
 }

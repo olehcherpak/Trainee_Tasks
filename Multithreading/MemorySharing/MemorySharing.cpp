@@ -6,59 +6,49 @@
 #include "MemoryPart.hpp"
 
 MemorySharing::MemorySharing() {
-    partsList = std::list<MemoryPart>();
+    // partsList = std::list<MemoryPart>();
     memory = nullptr;
-    mutex = new std::mutex;
 }
 
 MemorySharing::~MemorySharing() {
-    delete mutex;
-}
-
-void MemorySharing::reserveMemory(const int& size) {
-    if (size <= 0) {
-        throw wrong_size_exception();
-    }
-    mutex->lock();
-    memory = new char[size];
-    partsList.push_back(MemoryPart(memory, size));
-    mutex->unlock();
-}
-
-void MemorySharing::releaseMemory() {
-    mutex->lock();
-    for (auto iter = partsList.begin(); iter != partsList.end(); iter++) {
-        if (!iter->free()) {
-            iter->makeFree();
-        }
-    }
     if (memory != nullptr) {
         delete[] memory;
-        memory = nullptr;
     }
     partsList.clear();
-    mutex->unlock();
 }
 
-void* MemorySharing::getMemory(const int& size) {
-    if (size <= 0) {
+void MemorySharing::reserveMemory(const unsigned size) {
+    if (size == 0) {
         throw wrong_size_exception();
     }
-    mutex->lock();
-    auto iter = std::find_if(partsList.begin(), partsList.end(), [size] (const MemoryPart& rhs) { return rhs.getLength() >= size && rhs.free();});
+    mutex.lock();
+    if (memory != nullptr) {
+        throw twice_memory_reservation_exception();
+    }
+    memory = new char[size];
+    partsList.push_back(MemoryPart(memory, size));
+    mutex.unlock();
+}
+
+void* MemorySharing::getMemory(const unsigned& size) {
+    if (size == 0) {
+        throw wrong_size_exception();
+    }
+    mutex.lock();
+    auto iter = std::find_if(partsList.begin(), partsList.end(), [size] (const MemoryPart& rhs) { return rhs.getLength() >= size && rhs.isFree();});
     if (iter == partsList.end()) {
         throw out_of_memory_exception();
     }
 
     auto result = cutPart(iter, size);
-    mutex->unlock();
+    mutex.unlock();
 
     return (void*) result->getPtr();
 }
 
 void MemorySharing::freeMemory(void* ptr) {
     auto iter = findPart(ptr);
-    mutex->lock();
+    mutex.lock();
 
     iter->makeFree();
 
@@ -68,10 +58,10 @@ void MemorySharing::freeMemory(void* ptr) {
     auto prev = iter;
     prev--;
     combine(prev, iter);
-    mutex->unlock();
+    mutex.unlock();
 }
 
-void* MemorySharing::realloc(void* ptr, const int& size) {
+void* MemorySharing::realloc(void* ptr, const unsigned& size) {
     auto iter = findPart(ptr);
 
     if (size <= iter->getLength()) {
@@ -80,29 +70,28 @@ void* MemorySharing::realloc(void* ptr, const int& size) {
     auto next = iter;
     next++;
 
-    int need = size - iter->getLength();
+    int difference = size - iter->getLength();
 
-    mutex->lock();
-    if (next->free() && need <= next->getLength()) {
-        auto newPart = cutPart(next, need);
+    mutex.lock();
+    if (next->isFree() && difference <= next->getLength()) {
+        auto newPart = cutPart(next, difference);
         combine(iter, newPart);
-        mutex->unlock();
+        mutex.unlock();
         return (void*) iter->getPtr();
     }
-    mutex->unlock();
+    mutex.unlock();
 
     void* newPtr = getMemory(size);
     void* tmp = ptr;
-    mutex->lock();
+    mutex.lock();
     copy(ptr, newPtr, iter->getLength());
-    mutex->unlock();
+    mutex.unlock();
     freeMemory(tmp);
+
     return newPtr;
-
-
 }
 
-std::list<MemoryPart>::iterator MemorySharing::cutPart(std::list<MemoryPart>::iterator& iter, const int& size) {
+std::list<MemoryPart>::iterator MemorySharing::cutPart(std::list<MemoryPart>::iterator& iter, const unsigned& size) {
     if (iter->getLength() == size) {
         iter->makeBusy();
         return iter;
@@ -118,11 +107,11 @@ std::list<MemoryPart>::iterator MemorySharing::cutPart(std::list<MemoryPart>::it
     return res;
 }
 
-void MemorySharing::combine(std::list<MemoryPart>::iterator& iter1, std::list<MemoryPart>::iterator iter2) {
-    if (iter1->free() == iter2->free()) {
-        iter1->setLength(iter1->getLength() + iter2->getLength());
-        iter2->makeFree();
-        partsList.erase(iter2);
+void MemorySharing::combine(std::list<MemoryPart>::iterator& i, std::list<MemoryPart>::iterator j) {
+    if (i->isFree() == j->isFree()) {
+        i->setLength(i->getLength() + j->getLength());
+        j->makeFree();
+        partsList.erase(j);
     }
 }
 
@@ -136,11 +125,11 @@ std::list<MemoryPart>::iterator MemorySharing::findPart(void* ptr) {
     return iter;
 }
 
-void MemorySharing::copy(void* source, void* target, const int& size) {
+void MemorySharing::copy(void* source, void* target, const unsigned& size) {
     char* src = (char*) source;
     char* trg = (char*) target;
 
-    for (int i = 0; i < size; i++) {
+    for (unsigned i = 0; i < size; i++) {
         trg[i] = src[i];
     }
 }
